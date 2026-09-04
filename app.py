@@ -18,27 +18,31 @@ code_input = st.text_area(
 )
 
 HF_TOKEN = st.secrets.get("HF_TOKEN", "")
-
-# We route directly through the base instruction model fine-tuning endpoint
 MODEL_REPO = "Qwen/Qwen2.5-Coder-7B-Instruct" 
 
 if st.button("Debug Code"):
     if not code_input.strip():
         st.warning("Please enter some Python code to debug.")
     else:
-        prompt = f"Below is an instruction that describes a programming task, paired with an input that provides further context. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Input:\n{code_input}\n\n### Response:\n"
+        prompt = f"Instruction:\n{instruction}\n\nCode:\n{code_input}"
         
         with st.spinner("Analyzing code..."):
             try:
-                client = InferenceClient(token=HF_TOKEN if HF_TOKEN else None)
-                response = client.text_generation(
-                    prompt,
-                    model=MODEL_REPO,
-                    max_new_tokens=512,
-                    temperature=0.2,
-                    return_full_text=False
+                client = InferenceClient(model=MODEL_REPO, token=HF_TOKEN if HF_TOKEN else None)
+                
+                # Using chat_completion fixes the 'nscale' provider routing issue
+                response = client.chat_completion(
+                    messages=[
+                        {"role": "system", "content": "You are an expert Python debugger."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=512,
+                    temperature=0.2
                 )
+                
+                clean_res = response.choices[0].message.content
                 st.success("Analysis Complete!")
-                st.code(response.strip(), language="python")
+                st.code(clean_res.strip(), language="python")
+                
             except Exception as e:
                 st.error(f"Inference Error: {str(e)}")
