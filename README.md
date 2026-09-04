@@ -16,7 +16,6 @@ This application leverages open-source Large Language Models fine-tuned specific
 * **Fine-Tuning:** Unsloth, QLoRA (4-bit quantization), PyTorch, Hugging Face `peft`
 * **Dataset:** `flytech/python-codes-25k`
 * **Frontend & Hosting:** Streamlit Community Cloud
-* **API Engine:** Google Gemini Flash API
 
 ## ⚡ Key Engineering Features
 * **Efficient QLoRA Fine-Tuning:** Parameter-efficient fine-tuning with rank $r=16$, targeting linear projection layers while keeping memory footprint minimal.
